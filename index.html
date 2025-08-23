@@ -1221,30 +1221,7 @@ window.addEventListener('CookiebotOnConsentReady', function(){
       <button class="btn secondary" id="consent-decline">Ablehnen</button>
     </div>
   </div>
-  <script>
-    (function(){
-      const KEY='sw24_consent_v1';
-      function show(){document.getElementById('consent').style.display='block'}
-      function hide(){document.getElementById('consent').style.display='none'}
-      function load(){try{return localStorage.getItem(KEY)}catch(e){return null}}
-      function save(v){try{localStorage.setItem(KEY,v)}catch(e){}}
-      function enableGA(){
-        // TODO: set your GA4 ID
-        const GA='G-P4QRJ361T5';
-        if(!GA) return;
-        const s=document.createElement('script'); s.src='https://www.googletagmanager.com/gtag/js?id='+GA; s.async=1; document.head.appendChild(s);
-        window.dataLayer=window.dataLayer||[]; function gtag(){dataLayer.push(arguments)}
-        gtag('js', new Date()); gtag('config', GA, {'anonymize_ip': true});
-      }
-      document.addEventListener('DOMContentLoaded', function(){
-        const v = load();
-        if(!v) show();
-        document.getElementById('consent-accept').onclick=function(){ save('granted'); hide(); enableGA(); };
-        document.getElementById('consent-decline').onclick=function(){ save('denied'); hide(); };
-        if(v==='granted') enableGA();
-      });
-    })();
-  </script>
+ 
 
 
   <script type="application/ld+json">
@@ -1398,7 +1375,27 @@ window.addEventListener('CookiebotOnConsentReady', function(){
     })();
   </script>
 
-</body>
+</body><script>
+document.addEventListener('DOMContentLoaded', function(){
+  // WhatsApp-Klicks als GA4-Event
+  var waLinks = document.querySelectorAll(
+    'a[href*="wa.me"], a[href*="whatsapp.com"], a[href^="https://api.whatsapp.com"]'
+  );
+  waLinks.forEach(function(el){
+    el.addEventListener('click', function(){
+      gtag('event','whatsapp_click',{ engagement_time_msec: 1 });
+    });
+  });
+
+  // Optional: Telefon-Klicks
+  document.querySelectorAll('a[href^="tel:"]').forEach(function(el){
+    el.addEventListener('click', function(){
+      gtag('event','phone_click',{ engagement_time_msec: 1 });
+    });
+  });
+});
+</script>
+
 </html>
 
   <script type="application/ld+json">

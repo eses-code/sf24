@@ -1,6 +1,48 @@
 <!doctype html>
 <html lang="de">
-<head>
+<head><!-- gtag Loader: GA4 + Google Ads (einmalig im <head>) -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+
+  // Standard: ohne Einwilligung nichts messen
+  gtag('consent','default',{
+    ad_storage:'denied',
+    analytics_storage:'denied'
+  });
+
+  // gtag.js laden (nur 1x!)
+  (function(){
+    var s=document.createElement('script');
+    s.async=true;
+    s.src='https://www.googletagmanager.com/gtag/js?id=G-P4QRJ361T5';
+    document.head.appendChild(s);
+  })();
+
+  gtag('js', new Date());
+
+  // GA4
+  gtag('config','G-P4QRJ361T5', { send_page_view:true });
+
+  // Google Ads (deine AW-ID)
+  gtag('config','AW-17265936600');
+</script>
+<script>
+  // Wenn Nutzer zustimmt → Messung erlauben
+  document.addEventListener('DOMContentLoaded', function(){
+    var accept = document.getElementById('consent-accept');
+    var decline = document.getElementById('consent-decline');
+
+    if (accept) accept.addEventListener('click', function(){
+      gtag('consent','update',{ ad_storage:'granted', analytics_storage:'granted' });
+    });
+
+    if (decline) decline.addEventListener('click', function(){
+      gtag('consent','update',{ ad_storage:'denied', analytics_storage:'denied' });
+    });
+  });
+</script>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Recht & Vertrauen · Sofortwechsel</title>
@@ -229,6 +271,24 @@ Datum/Unterschrift (bei Mitteilung auf Papier)</pre>
   src="https://consent.cookiebot.com/YOUR-CBID/cd.js"
   data-culture="de"
   async></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  // WhatsApp-Links automatisch tracken
+  var waSelector = 'a[href*="wa.me"], a[href*="whatsapp.com"], a[data-track="wa"]';
+  document.querySelectorAll(waSelector).forEach(function(el){
+    el.addEventListener('click', function(){
+      // !!! HIER DEIN EXACTES LABEL EINFÜGEN !!!
+      // send_to = AW-ID + "/" + Conversion-Label aus Google Ads
+      gtag('event','conversion', {
+        'send_to': 'AW-17265936600/DEIN_CONVERSION_LABEL'
+      });
+
+      // Optional zusätzliches GA4-Event
+      gtag('event','whatsapp_click', {'engagement_time_msec':1});
+    });
+  });
+});
+</script>
 
 </body>
 </html>
