@@ -608,24 +608,215 @@
 
 
   <!-- Tarifrechner + Preisradar -->
-  <section id="rechner" class="py-14 bg-white border-t">
-    <div class="max-w-6xl mx-auto px-4">
-      <h2 class="text-2xl md:text-3xl font-black">Tarifrechner (light) – Beispielangebote & Preisradar</h2>
-      <p class="text-gray-600">Unverbindliche Richtwerte. Exakte Preise nach PLZ/Netzgebiet.</p>
-      <form id="calcForm" class="card p-6 mt-4 grid md:grid-cols-4 gap-4">
-        <div><label class="text-sm font-medium">PLZ</label><input id="calcPLZ" type="text" class="mt-1 w-full input border-gray-300" placeholder="10115"/></div>
-        <div><label class="text-sm font-medium">Strom (kWh/Jahr)</label><input id="calcStrom" type="number" min="0" class="mt-1 w-full input border-gray-300" placeholder="3000"/></div>
-        <div><label class="text-sm font-medium">Gas (kWh/Jahr)</label><input id="calcGas" type="number" min="0" class="mt-1 w-full input border-gray-300" placeholder="12000"/></div>
-        <div class="flex items-end"><button type="button" id="calcBtn" class="btn btn-primary w-full">Berechnen</button></div>
-      </form>
-      <div id="calcResults" class="grid md:grid-cols-3 gap-4 mt-6"></div>
-      <div class="mt-8 card p-6">
-        <h3 class="font-semibold mb-2">Preisradar (Richtwerte)</h3>
-        <canvas id="radar" height="100"></canvas>
-        <div class="text-xs text-gray-500 mt-2">* Beispielhafte Markttrends (monatlich). Exakte Daten nach PLZ/Netzgebiet.</div>
+  <!-- Tarifrechner (light) – Marktpreis-orientiert -->
+<section id="rechner" class="py-14 bg-white border-t">
+  <div class="max-w-6xl mx-auto px-4">
+
+    <h2 class="text-2xl md:text-3xl font-black">Tarifrechner (light) – Beispielangebote & Preisradar</h2>
+    <p class="text-gray-600">Unverbindliche Richtwerte. Exakte Preise nach PLZ/Netzgebiet & Verbrauch.</p>
+
+    <!-- Form -->
+    <form id="calcForm" class="card p-6 mt-4 grid md:grid-cols-4 gap-4">
+      <div>
+        <label class="text-sm font-medium">PLZ</label>
+        <input id="calcPLZ" type="text" inputmode="numeric" maxlength="5"
+               class="mt-1 w-full input border-gray-300" placeholder="10115" value="10115"/>
       </div>
+
+      <div class="md:col-span-2">
+        <label class="text-sm font-medium">Verbrauch (kWh/Jahr)</label>
+
+        <div class="mt-1 flex gap-2">
+          <button type="button" id="btnStrom" class="flex-1 btn toggle active">Strom</button>
+          <button type="button" id="btnGas"   class="flex-1 btn toggle">Gas</button>
+        </div>
+
+        <input id="calcValue" type="number" min="0" class="mt-2 w-full input border-gray-300"
+               placeholder="3000" value="3000"/>
+      </div>
+
+      <div class="md:flex md:items-end">
+        <button id="calcBtn" type="button" class="btn btn-primary w-full">Berechnen</button>
+      </div>
+    </form>
+
+    <!-- Results -->
+    <div id="calcResults" class="card p-6 mt-4">
+      <h3 class="font-semibold text-amber-900 flex items-center gap-2">
+        Günstigster Tarif verfügbar*
+        <span class="inline-flex items-center rounded-full bg-green-600 text-white text-xs font-semibold px-2 py-1">
+          24 Monate E-Preis-Garantie
+        </span>
+      </h3>
+
+      <p class="text-gray-700 mt-2">
+        <span class="block text-sm text-gray-600">Marktpreis (Richtwert):</span>
+        <span id="marketPrice" class="text-3xl font-extrabold text-gray-900">–</span>
+        <span id="minMaxRow" class="block text-sm text-gray-500 mt-1">–</span>
+        <span id="rangeRow"  class="block text-xs text-gray-500">–</span>
+      </p>
+
+      <p class="text-xs text-gray-500 mt-1">
+        *Preise variieren je nach Region & Anbieter. Exakte Angebote telefonisch oder per Beratungstermin.
+      </p>
+
+      <!-- CTAs -->
+      <div class="mt-4 flex flex-col sm:flex-row gap-3">
+        <a id="ctaPhone" href="tel:+491639116317"
+           class="inline-flex items-center justify-center rounded-xl bg-red-600 hover:bg-red-700 text-white px-5 py-3 font-semibold">
+          Jetzt kostenfrei anrufen
+        </a>
+
+        <a id="ctaWhats" href="https://api.whatsapp.com/send/?phone=491639116317"
+           target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center justify-center rounded-xl bg-green-600 hover:bg-green-700 text-white px-5 py-3 font-semibold">
+          Über WhatsApp schreiben
+        </a>
+
+        <a id="ctaConsult" href="/beratungstermin"
+           class="inline-flex items-center justify-center rounded-xl bg-gray-900 hover:bg-black text-white px-5 py-3 font-semibold">
+          Jetzt Beratungstermin anfragen
+        </a>
+      </div>
+
+      <div class="mt-3 text-xs text-gray-600">Öffnungszeiten: Mo–Sa 08:00–20:00, So 10:00–18:00</div>
     </div>
-  </section>
+
+    <!-- Preisradar -->
+    <div class="card p-6 mt-4">
+      <h3 class="font-semibold">Preisradar (Richtwerte)</h3>
+
+      <div id="radar" class="grid grid-cols-3 gap-6 items-end mt-4">
+        <!-- Säulen werden via JS gefüllt -->
+      </div>
+
+      <div class="mt-3 text-xs">
+        <span class="inline-flex items-center gap-1 rounded-md bg-yellow-100 text-yellow-900 px-2 py-1 font-medium">Achtung</span>
+        <span class="text-gray-600">: Grundversorgung orientiert sich am Marktpreis – lassen Sie sich beraten, um teure Tarife zu vermeiden.</span>
+      </div>
+
+      <p class="text-xs text-gray-500 mt-2">Beispielhafte Markttrends. Für verbindliche Preise ist eine PLZ-/Netzgebietsprüfung nötig.</p>
+    </div>
+  </div>
+
+  <style>
+    /* Mini Hilfsstyles, Tailwind-ähnlich */
+    .card{background:#fff;border:1px solid #eee;border-radius:16px}
+    .btn{border:1px solid #e5e7eb;border-radius:12px;padding:.5rem .75rem;font-weight:600}
+    .btn-primary{background:#2563eb;color:#fff;border-color:#2563eb}
+    .toggle.active{background:#2563eb;color:#fff;border-color:#2563eb}
+    .input{border-radius:12px;padding:.5rem .75rem}
+    .bar{width:96px;border-radius:16px}
+    .bar.green{background:#16a34a}
+    .bar.blue{background:#2563eb}
+    .bar.red{background:#dc2626}
+    .barLabel{margin-top:.5rem;font-size:.9rem;color:#374151;font-weight:600}
+    .barSub{font-size:.75rem;color:#6b7280}
+  </style>
+
+  <script>
+    (function(){
+      // ====== Einstellungen ======
+      const PHONE = "tel:+491639116317";
+      const WHATS = "https://api.whatsapp.com/send/?phone=491639116317";
+
+      // sehr einfache Richtwert-Logik je PLZ-Region (erste 2 Ziffern)
+      function regionParams(plz){
+        const r = (plz||"").slice(0,2);
+        const map = {
+          "10": { base:12, apMin:0.28, apMax:0.38, gasMin:0.08, gasMax:0.12 },
+          "20": { base:11, apMin:0.27, apMax:0.36, gasMin:0.07, gasMax:0.11 },
+          "30": { base:12, apMin:0.29, apMax:0.39, gasMin:0.08, gasMax:0.12 },
+          "40": { base:13, apMin:0.30, apMax:0.40, gasMin:0.08, gasMax:0.13 },
+          "50": { base:12, apMin:0.29, apMax:0.39, gasMin:0.08, gasMax:0.12 },
+          "60": { base:12, apMin:0.28, apMax:0.37, gasMin:0.07, gasMax:0.11 },
+          "70": { base:11, apMin:0.27, apMax:0.36, gasMin:0.07, gasMax:0.10 },
+          "80": { base:12, apMin:0.28, apMax:0.37, gasMin:0.07, gasMax:0.11 },
+          "90": { base:12, apMin:0.29, apMax:0.38, gasMin:0.08, gasMax:0.12 },
+          "default": { base:12, apMin:0.29, apMax:0.38, gasMin:0.08, gasMax:0.12 }
+        };
+        return map[r] || map.default;
+      }
+
+      function euro(n){ return n.toLocaleString("de-DE",{style:"currency",currency:"EUR"}); }
+
+      // DOM
+      const elPLZ   = document.getElementById("calcPLZ");
+      const elVal   = document.getElementById("calcValue");
+      const btnStrom= document.getElementById("btnStrom");
+      const btnGas  = document.getElementById("btnGas");
+      const btnCalc = document.getElementById("calcBtn");
+      const elMarket= document.getElementById("marketPrice");
+      const elMinMax= document.getElementById("minMaxRow");
+      const elRange = document.getElementById("rangeRow");
+      const radar   = document.getElementById("radar");
+      const ctaPhone= document.getElementById("ctaPhone");
+      const ctaWhats= document.getElementById("ctaWhats");
+
+      // CTAs
+      ctaPhone.href = PHONE;
+      ctaWhats.href = WHATS;
+
+      let mode = "strom"; // "strom" | "gas"
+      btnStrom.addEventListener("click", ()=>{ mode="strom"; btnStrom.classList.add("active"); btnGas.classList.remove("active"); elVal.placeholder="3000"; });
+      btnGas  .addEventListener("click", ()=>{ mode="gas";   btnGas.classList.add("active"); btnStrom.classList.remove("active"); elVal.placeholder="12000"; });
+
+      function calc(){
+        const plz = (elPLZ.value||"").replace(/[^0-9]/g,"").slice(0,5);
+        elPLZ.value = plz;
+        const kwh = Math.max(0, Number(elVal.value||0));
+
+        const p = regionParams(plz);
+        const baseYear = p.base * 12;
+
+        const yearMin = mode==="strom" ? baseYear + kwh*p.apMin  : baseYear + kwh*p.gasMin;
+        const yearMax = mode==="strom" ? baseYear + kwh*p.apMax  : baseYear + kwh*p.gasMax;
+
+        const monMin  = yearMin/12;
+        const monMax  = yearMax/12;
+        const market  = (monMin + monMax)/2;
+
+        // Ergebnisse oben
+        elMarket.textContent = euro(market);
+        elMinMax.innerHTML   = `Günstig: ${euro(monMin)} · Teuer: ${euro(monMax)}`;
+        elRange.textContent  = `Spanne: ${euro(monMin)} – ${euro(monMax)}`;
+
+        // Preisradar unten (günstig / Markt / teuer) -> dynamik
+        radar.innerHTML = "";
+        const values = [monMin, market, monMax];
+        const labels = ["günstig","Ø Markt","teurer"];
+        const classes= ["green","blue","red"];
+        const max = Math.max(...values) * 1.15;
+
+        values.forEach((v,i)=>{
+          const wrap = document.createElement("div");
+          wrap.className = "flex flex-col items-center";
+
+          const bar = document.createElement("div");
+          bar.className = "bar " + classes[i];
+          bar.style.height = Math.max(24, (v/max)*160) + "px";
+          wrap.appendChild(bar);
+
+          const t1 = document.createElement("span");
+          t1.className = "barLabel";
+          t1.textContent = labels[i];
+          wrap.appendChild(t1);
+
+          const t2 = document.createElement("span");
+          t2.className = "barSub";
+          t2.textContent = euro(v) + "/Monat";
+          wrap.appendChild(t2);
+
+          radar.appendChild(wrap);
+        });
+      }
+
+      btnCalc.addEventListener("click", calc);
+      // Erste Berechnung
+      calc();
+    })();
+  </script>
+</section>
 
   <!-- Anbieter-Hub -->
   <section id="providers" class="py-14 bg-gray-50">
